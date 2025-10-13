@@ -1,0 +1,4 @@
+{
+    "githubPullRequests.codingAgent.enabled": false,
+    "githubPullRequests.experimental.chat": false
+}
