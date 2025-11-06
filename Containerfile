@@ -2,10 +2,12 @@
 ARG BASE_IMAGE_NAME="kinoite-main"
 ARG FEDORA_VERSION="42"
 ARG BASE_IMAGE="ghcr.io/ublue-os/${BASE_IMAGE_NAME}"
+ARG IMAGE_FLAVOR="main"
+ARG IMAGE_TAG="${tag}"
+
 # ARG IMAGE_NAME="${image_name}"
 # ARG IMAGE_VENDOR="lightprod"
-# ARG IMAGE_FLAVOR="main"
-# ARG IMAGE_TAG="${tag}"
+
 
 # Allow build scripts to be referenced without being copied into the final image
 FROM scratch AS ctx
@@ -35,13 +37,10 @@ COPY build_files /
 
 FROM ${BASE_IMAGE}:${FEDORA_VERSION} AS ${IMAGE_NAME}
 
-ARG BASE_IMAGE_NAME="kionite-main"
-ARG FEDORA_VERSION="42"
-ARG BASE_IMAGE="ghcr.io/ublue-os/${BASE_IMAGE_NAME}"
-ARG IMAGE_NAME="kyanite"
-ARG IMAGE_VENDOR="lightprod"
-ARG IMAGE_FLAVOR="main"
-ARG IMAGE_TAG="${tag}"
+# ARG BASE_IMAGE_NAME="kionite-main"
+# ARG FEDORA_VERSION="42"
+# ARG BASE_IMAGE="ghcr.io/ublue-os/${BASE_IMAGE_NAME}"
+# ARG IMAGE_TAG="${tag}"
 
 COPY system_files /
 
