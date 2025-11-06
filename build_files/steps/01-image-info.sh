@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Based on the work done in Aurora and Bazzite
+
 log() { # from AmyOS's build files
   echo "=== $* ==="
 }
@@ -14,25 +16,92 @@ display() {
 
 set -ouex pipefail
 
+# Available flavors for Kyanite:
+# Main:
+# main (main image, uses ublue's Kinoite image as base. Ref: docker://ghcr.io/lightprod/kyanite)
+# main-bsx (main image with Plasma BigScreen experience. Plasma unstable  is required to install 'plasma-bigscreen', uses ublue's Kinoite image as base. Ref: docker://ghcr.io/lightprod/kyanite-bsx)
+
+# Nvidia:
+# main-nvidia (main image with nvidia drivers, uses ublue's Kinoite image as base. Ref: docker://ghcr.io/lightprod/kyanite-nvidia) <- Maybe later
+# main-bsx-nvidia (main image with Plasma BigScreen experience and nvidia drivers, uses ublue's Kinoite image as base. Ref: docker://ghcr.io/lightprod/kyanite-nvidia) <- Maybe later
 
 # Defining variables
 
-# Taken from Bazzite
-
-
-IMAGE_PRETTY_NAME="Kyanite ${FEDORA_VERSION}"
-IMAGE_LIKE="fedora"
-HOME_URL="https://github.com/Lightprod/Kyanite"
-# DOCUMENTATION_URL="https://docs.bazzite.gg"
-SUPPORT_URL="https://github.com/Lightprod/Kyanite/issues"
-BUG_SUPPORT_URL="https://github.com/Lightprod/Kyanite/issues"
-# LOGO_ICON="bazzite-logo-icon"
-# LOGO_COLOR="0;38;2;138;43;226"
+# Non metadata:
 
 IMAGE_INFO="/usr/share/ublue-os/image-info.json"
-IMAGE_REF="ostree-image-signed:docker://ghcr.io/$IMAGE_VENDOR/$IMAGE_NAME"
+OS_RELEASE_FILE= "/usr/lib/os-release"
+OS_NAME="Kyanite"
+OS_NAME_PRETTY="${OS_NAME,,}"
+
+# Common metadata for all flavors
+
+IMAGE_VENDOR="lightprod"
+CPE_NAME="cpe:/o:lightprod:${OS_NAME_PRETTY}:${FEDORA_VERSION}"
+DEFAULT_HOSTNAME="${OS_NAME_PRETTY}"
+HOME_URL="https://github.com/Lightprod/Kyanite"
+SUPPORT_URL="https://github.com/Lightprod/Kyanite/issues"
+BUG_SUPPORT_URL="https://github.com/Lightprod/Kyanite/issues"
+BOOTLOADER_NAME="${OS_NAME} ${FEDORA_VERSION}"
+
+
+# DOCUMENTATION_URL="https://docs.bazzite.gg"
+# LOGO_ICON="bazzite-logo-icon"
+# LOGO_COLOR="0;38;2;138;43;226"
 # IMAGE_BRANCH_NORMALIZED=$IMAGE_BRANCH
 # IMAGE_TAG="${FEDORA_VERSION}"
+
+fonction define_image_metadata(){
+  # Flavor metadata
+    case "${IMAGE_FLAVOR}" in
+      "main")
+        log "Image flavor is main."
+
+        IMAGE_NAME="${OS_NAME_PRETTY}"
+        VARIANT="${OS_NAME}"
+        VARIANT_ID="${OS_NAME_PRETTY}"
+
+      ;;
+      "main-bsx")
+        log "Image flavor is main-bsx."
+
+        IMAGE_NAME="${OS_NAME_PRETTY}-bsx"
+        VARIANT="Big Screen"
+        VARIANT_ID="bsx"
+
+      ;;
+      # "main-nvidia")
+      #   log "Image flavor is main-nvidia."
+
+      #   IMAGE_NAME="${OS_NAME_PRETTY}-nvidia"
+      #   VARIANT="${OS_NAME}"
+      #   VARIANT_ID="nvidia"
+
+      # ;;
+      # "main-bsx-nvidia")
+      #   log "Image flavor is main-nvidia."
+
+      #   IMAGE_NAME="${OS_NAME_PRETTY}-bsx-nvidia"
+      #   VARIANT="Big Screen"
+      #   VARIANT_ID="bsx-nvidia"
+      # ;;
+      *)
+        log "Image flavor not found. Aborting!"
+        exit 1
+      ;;
+    esac
+
+
+IMAGE_REF="ostree-image-signed:docker://ghcr.io/$IMAGE_VENDOR/$IMAGE_NAME"
+VERSION="${IMAGE_VERSION} (${VARIANT})" # <= Need to get build nb from the action
+# ID="${OS_NAME_PRETTY}"
+
+}
+
+
+log "Defining image metadata"
+define_image_metadata
+
 
 log "Setting up image info file"
 
@@ -52,7 +121,36 @@ EOF
   # "image-branch": "$IMAGE_BRANCH_NORMALIZED",
   # "version": "$VERSION_TAG",
   # "version-pretty": "$VERSION_PRETTY"
-# log "Setting up os Release file"
+
+log "Setting up os Release file"
+
+sed -i "s/^NAME=.*/NAME=\"${OS_NAME}\"/" $OS_RELEASE_FILE
+sed -i "s/^VERSION=.*/VERSION=\"${VERSION}\"" $OS_RELEASE_FILE
+sed -i "s/^VERSION_CODENAME=.*/VERSION_CODENAME=\" \"" $OS_RELEASE_FILE
+# sed -i "s/^PRETTY_NAME=.*/PRETTY_NAME='"'${OS_NAME} # Might not change it due to Steam Hardware Survey
+sed -i "s/^CPE_NAME=.*/^CPE_NAME=\"${CPE_NAME}\" /" $OS_RELEASE_FILE
+sed -i "s/^DEFAULT_HOSTNAME=.*/DEFAULT_HOSTNAME=\"${DEFAULT_HOSTNAME}\"/" $OS_RELEASE_FILE
+sed -i "s|^HOME_URL=.*/HOME_URL=\"${HOME_URL}\" /" $OS_RELEASE_FILE
+sed -i "s|^SUPPORT_URL=.*/SUPPORT_URL=\"${SUPPORT_URL}\" /" $OS_RELEASE_FILE
+sed -i "s|^BUG_REPORT_URL=.*/BUG_REPORT_URL=\"${BUG_SUPPORT_URL}\" /" $OS_RELEASE_FILE
+sed -i "s|^VARIANT=.*/VARIANT=\"${VARIANT}\" /" $OS_RELEASE_FILE
+sed -i "s|^VARIANT_ID=.*/VARIANT_ID=\"${VARIANT_ID}\" /" $OS_RELEASE_FILE
+sed -i "s|^OSTREE_ID=.*/OSTREE_ID=\"${IMAGE_VERSION}\" /" $OS_RELEASE_FILE
+sed -i "s|^BUILD_ID=.*/BUILD_ID=\"${BUILD_ID}\" /" $OS_RELEASE_FILE
+sed -i "s|^IMAGE_ID=.*/IMAGE_ID=\"${IMAGE_NAME}\" /" $OS_RELEASE_FILE
+sed -i "s|^IMAGE_VERSION=.*/IMAGE_VERSION=\"${IMAGE_VERSION}\" /" $OS_RELEASE_FILE
+echo "BOOTLOADER_NAME=\"${BOOTLOADER_NAME}\"" >> $OS_RELEASE_FILE
+
+log "Fix issues caused by ID no longer being fedora"
+sed -i "s/^EFIDIR=.*/EFIDIR=\"fedora\"/" /usr/sbin/grub2-switch-to-blscfg
+
+log "Done."
+
+display $IMAGE_INFO
+display /usr/lib/os-release
+
+# Note: Rebuild initramfs
+
 
 # sed -i "s/^VARIANT_ID=.*/VARIANT_ID=$IMAGE_NAME/" /usr/lib/os-release
 # sed -i "s/^PRETTY_NAME=.*/PRETTY_NAME=\"$OS_NAME\"/" /usr/lib/os-release
@@ -72,12 +170,3 @@ EOF
 # echo "BUILD_ID=\"$VERSION_PRETTY\"" >> /usr/lib/os-release
 # echo "BOOTLOADER_NAME=\"$IMAGE_PRETTY_NAME ($VERSION_PRETTY)\"" >> /usr/lib/os-release
 
-# Fix issues caused by ID no longer being fedora
-# sed -i "s/^EFIDIR=.*/EFIDIR=\"fedora\"/" /usr/sbin/grub2-switch-to-blscfg
-
-log "Done."
-
-display $IMAGE_INFO
-display /usr/lib/os-release
-
-# Note: Rebuild initramfs
