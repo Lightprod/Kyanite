@@ -11,7 +11,9 @@ ARG IMAGE_TAG="${tag}"
 
 # Allow build scripts to be referenced without being copied into the final image
 FROM scratch AS ctx
-COPY build_files /
+COPY build_files /bld
+COPY build_ref_files /ref
+# COPY system_files /sys
 
 
 ##########################################
@@ -35,12 +37,13 @@ COPY build_files /
 # ARG VERSION_PRETTY="${VERSION_PRETTY}"
 
 
-FROM ${BASE_IMAGE}:${FEDORA_VERSION} AS ${IMAGE_NAME}
+FROM ${BASE_IMAGE}:${FEDORA_VERSION} AS base
 
-# ARG BASE_IMAGE_NAME="kionite-main"
-# ARG FEDORA_VERSION="42"
-# ARG BASE_IMAGE="ghcr.io/ublue-os/${BASE_IMAGE_NAME}"
-# ARG IMAGE_TAG="${tag}"
+ARG BASE_IMAGE_NAME="kionite-main"
+ARG FEDORA_VERSION="42"
+ARG BASE_IMAGE="ghcr.io/ublue-os/${BASE_IMAGE_NAME}"
+ARG IMAGE_FLAVOR="main"
+ARG IMAGE_TAG="${tag}"
 
 COPY system_files /
 
@@ -48,7 +51,7 @@ RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
     --mount=type=cache,dst=/var/cache \
     --mount=type=cache,dst=/var/log \
     --mount=type=tmpfs,dst=/tmp \
-    /ctx/build.sh    
+    /ctx/bld/build.sh    
 
     ### LINTING
 ## Verify final image and contents are correct.
