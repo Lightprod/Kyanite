@@ -14,13 +14,16 @@ display() {
 
 set -ouex pipefail
 
-log "Building $IMAGE_NAME"
+log "Building main image"
 
 log "Step 1 : Setting up image info metadata"
-    /ctx/steps/01-image-info.sh
+    /ctx/bld/steps/01-image-info.sh
 
-log "Step 2: Native packages management"
-    /ctx/steps/02-native-packages.sh
+log "Step 2: Manage native packages"
+    /ctx/bld/steps/02-native-packages.sh
 
-log "Step 3: System configuration"
-    /ctx/steps/03-system-config.sh
+log "Step 3: Configure system"
+    /ctx/bld/steps/03-system-config.sh
+
+log "Step 4: Configure flatpak"
+    /ctx/bld/steps/04-flatpak.sh
