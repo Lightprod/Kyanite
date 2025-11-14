@@ -1,0 +1,98 @@
+#!/usr/bin/bash
+
+# Script info
+SCRIPT_VER=0.1 # Not used, just for info
+CHECK_FOLDER="/etc/kyanite/setup"
+LOG_FILE=$"${CHECK_FOLDER}/log"
+SETUP_RAN_FILE=$"${CHECK_FOLDER}/setup_ran"
+SKIP_SETUP_FILE=$"${CHECK_FOLDER}/skip_setup"
+FLATPAK_LIST=$(< /usr/share/kyanite/flatpak/default_list)
+FLATPAK_BLOCKLIST="/usr/share/kyanite/flatpak/blocklist"
+
+# ============================================================================================================================================
+
+disable_setup(){
+    systemctl disable kyanite_setup.service
+    systemctl mask kyanite_setup.service
+    exit 0
+}
+
+# ============================================================================================================================================
+
+# Exit if skip file is present
+if [[ -f $SKIP_SETUP_FILE]]; then # If the file is here, skip setup
+    exit 0
+fi
+
+# Check if setup was ran
+if [[ -f $SETUP_RAN_FILE]]; then # If the file is here, skip setup and disable it
+    disable_setup
+fi
+
+# ============================================================================================================================================
+# Annonce setup is running
+plymouth display-message --text="Please wait while Kyanite is finishing first boot setup..."
+
+# ============================================================================================================================================
+
+# Identify username
+USERNAME=$(id -un 1000 2> /dev/null) #first user account should be 1000.
+
+if [${USERNAME}= ""]; then #failsafe
+    echo "Setup was not capable of identifying the username. Please check if an user was created. Aborting setup!" >> ${LOG_FILE}
+    exit 1
+else
+    USER_DIR="/var/home/${USERNAME,,}"
+fi
+
+# Copying files from /etc/skel to user directory
+
+# Backup user files first
+
+BACKUP_DIR="${USER_DIR}/.kyanite-setup/backup"
+
+mkdir "${USER_DIR}/.kyanite-setup"
+mkdir "${BACKUP_DIR}"
+cp "${USER_DIR}/.bashrc" "${BACKUP_DIR}/.bashrc"
+
+
+# Copy files
+cp "/etc/skel/.bashrc" "${USER_DIR}/.bashrc"
+
+
+# ============================================================================================================================================
+
+# Cleanup flatpak packages
+flatpak remove --all --delete-data --assumeyes --noninteractive
+
+# Get flatpak repos and delete them
+FLATPAK_REPO=$(flatpak remotes --show-disabled --columns=name)
+for repo in ${FLATPAK_REPO}; do
+    flatpak remote-delete --system --force $repo
+done
+
+# Install flathub and configure it
+
+flatpak remote-add --if-not-exist --system flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+flatpak remote-modify --system --enable flathub
+
+# Filter unwanted flatpak
+if [-f ${FLATPAK_BLOCKLIST}]; then
+    flatpak remote-modify --system --filter=${FLATPAK_BLOCKLIST} flathub
+fi
+
+# Install flatpak using flatpak preinstall
+flatpak preinstall --system --assumeyes --noninteractive
+
+# Install flatpak using flatpak install
+flatpak install --system --assumeyes --noninteractive ${FLATPAK_LIST}
+
+
+# Creating setup ran file
+if [[! -d ${CHECK_FOLDER}]]; then
+    mkdir ${CHECK_FOLDER}
+fi
+touch $SETUP_RAN_FILE
+
+# Disable and mask setup service
+disable_setup

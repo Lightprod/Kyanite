@@ -1,0 +1,18 @@
+[Unit]
+Description="Finalise setup"
+# Before=graphical.target display-manager.service plymouth-quit-wait.service
+Before=plymouth-quit.service
+Requires=network-online.target
+After=network-online.target plymouth-start.service
+# Wants=
+
+[Service]
+Type=oneshot
+# ExecStart=plymouth display-message --text="Please wait while Bazzite is installing defaults flatpaks..."
+ExecStart=/usr/libexec/kyanite/setup
+Restart=on-failure
+RestartSec=5
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
