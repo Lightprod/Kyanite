@@ -38,14 +38,17 @@ UPSTREAM_PACKAGES_RM=""
 log "Setting up variables"
 
 
-EXT_REPOS_URL=(
-    "https://download.docker.com/linux/fedora/docker-ce.repo"
-)
+# EXT_REPOS_URL=(
+#     "https://download.docker.com/linux/fedora/docker-ce.repo"
+# )
 
 UBLUE_COPR_REPOS=(
     "ublue-os/packages"
     "ublue-os/staging"
 )
+
+UBLUE_FLATPAK_COPR="ublue-os/flatpak-test"
+
 
 BAZZITE_COPR_REPOS=(
     "bazzite-org/bazzite"
@@ -58,16 +61,27 @@ COPR_REPOS=(
     atim/starship
 )
 
+
+# COPR_REPOS=(
+#     # "lizardbyte/beta"
+#     atim/starship
+#     "ublue-os/packages"
+#     "ublue-os/staging"
+#     "bazzite-org/bazzite"
+#     "bazzite-org/bazzite-multilib"
+#     "bazzite-org/webapp-manager"
+# )
+
 PLASMA_UNSTABLE_COPR_REPO=(
     "solopasha/plasma-unstable"
     "solopasha/kde-gear-unstable"
 )
 
-STEAM_ONLY_RPM_FUSION=(
-    "rpmfusion-nonfree-steam"
-    "rpmfusion-nonfree-steam-debuginfo"
-    "rpmfusion-nonfree-steam-source"
-)
+# STEAM_ONLY_RPM_FUSION=(
+#     "rpmfusion-nonfree-steam"
+#     "rpmfusion-nonfree-steam-debuginfo"
+#     "rpmfusion-nonfree-steam-source"
+# )
 
 
  # Upstream packages to remove
@@ -105,40 +119,52 @@ FEDORA_PACKAGES_INSTALL=(
     "gparted"
 )
 
-RPM_FUSION_PACKAGES_INSTALL=(
+# RPM_FUSION_PACKAGES_INSTALL=(
+#     "steam"
+#     "steam-devices"
+# )
+
+# TERRA_PACKAGES_INSTALL=(
+    # "firacode-nerd-fonts"
+# )
+
+TERRA_PACKAGES_INSTALL=(
+    "firacode-nerd-fonts"
     "steam"
     "steam-devices"
 )
 
-TERRA_PACKAGES_INSTALL=(
-    "firacode-nerd-fonts"
-)
+# EXT_REPOS_PACKAGES_INSTALL=(
+#     "docker-ce" 
+#     "docker-ce-cli" 
+#     "containerd.io" 
+#     "docker-buildx-plugin" 
+#     "docker-compose-plugin"
+# )
 
-TERRA_PACKAGES_INSTALL=(
-    "firacode-nerd-fonts"
-    "steam"
-    "steam-devices"
-)
-
-EXT_REPOS_PACKAGES_INSTALL=(
-    "docker-ce" 
-    "docker-ce-cli" 
-    "containerd.io" 
-    "docker-buildx-plugin" 
-    "docker-compose-plugin"
-)
-
-COPR_PACKAGES_INSTALL=(
-    "starship"
-)
+# COPR_PACKAGES_INSTALL=(
+#     "starship"
+#     "ublue-fastfetch"
+# 	"ublue-motd"
+#     # "steamdeck-kde-presets-desktop"
+#     "wallpaper-engine-kde-plugin"
+#     "webapp-manager"
+# )
 
 UBLUE_COPR_PACKAGES_INSTALL=(
     "ublue-fastfetch"
 	"ublue-motd"
 )
 
+UBLUE_FLATPAK_PACKAGES=(
+    "flatpak"
+    "flatpak-libs"
+    "flatpak-session-helper"
+)
+
 BAZZITE_COPR_PACKAGES_INSTALL=(
-    "wallpaper-engine-kde-plugin"
+    # "steamdeck-kde-presets-desktop"
+    # "wallpaper-engine-kde-plugin" # Removed in Bazzite 43
     "webapp-manager"
 )
 
@@ -200,13 +226,13 @@ log "Install packages from Terra repos"
 # ====================================================================
 # Install external repo and install packages
 
-log "Install external repos"
+# log "Install external repos"
 
-    dnf5 config-manager addrepo --from-repofile="${EXT_REPOS_URL}"
+#     dnf5 config-manager addrepo --from-repofile="${EXT_REPOS_URL}"
 
-log "Install packages from Terra repos"
+# log "Install packages from Terra repos"
 
-    dnf5 install --skip-broken --skip-unavailable -y ${EXT_REPOS_PACKAGES_INSTALL[@]}
+#     dnf5 install --skip-broken --skip-unavailable -y ${EXT_REPOS_PACKAGES_INSTALL[@]}
 
 # ====================================================================
 # Enable ublue's copr repos and install packages
@@ -222,6 +248,20 @@ log "Enable ublue's copr repos"
 log "Install ublue-os copr packages"
 
     dnf5 install --skip-broken --skip-unavailable -y ${UBLUE_COPR_PACKAGES_INSTALL[@]}
+
+
+# ====================================================================
+# Enable ublue's flatpak copr repos and install packages
+
+log "Enable ublue's copr repos and swap flatpak version" # To be removed once it land on Fedora
+
+    REPO_ID="copr:copr.fedorainfracloud.org:${UBLUE_FLATPAK_COPR////:}"
+    dnf5 copr enable ${UBLUE_FLATPAK_COPR} -y
+    
+    for $package in $UBLUE_FLATPAK_PACKAGES; do
+        dnf5 -y --repo="${REPO_ID}" swap $package $package
+    done
+
 
 
 # ====================================================================
@@ -242,17 +282,17 @@ log "Install bazzite copr packages"
 # ====================================================================
 # Enable copr repos and install packages
 
-log "Enable copr repos"
+# log "Enable copr repos"
 
-    for repos in $COPR_REPOS; do
-        REPO_ID="copr:copr.fedorainfracloud.org:${repos////:}"
-        dnf5 copr enable $repos -y
-        # dnf5 config-manager setopt "${REPO_ID}.priority=1"
-    done
+#     for repos in $COPR_REPOS; do
+#         REPO_ID="copr:copr.fedorainfracloud.org:${repos////:}"
+#         dnf5 copr enable $repos -y
+#         # dnf5 config-manager setopt "${REPO_ID}.priority=1"
+#     done
 
-log "Install copr packages"
+# log "Install copr packages"
 
-    dnf5 install --skip-broken --skip-unavailable -y ${COPR_PACKAGES_INSTALL[@]}
+#     dnf5 install --skip-broken --skip-unavailable -y ${COPR_PACKAGES_INSTALL[@]}
 
 # ====================================================================
 # Enable plasma-unstable's copr repos
