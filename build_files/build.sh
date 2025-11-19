@@ -27,3 +27,6 @@ log "Step 3: Configure system"
 
 log "Step 4: Configure flatpak"
     /ctx/bld/steps/04-flatpak.sh
+
+log "Last step: Cleanup"
+    /ctx/bld/steps/cleanup.sh
