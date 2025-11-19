@@ -30,14 +30,16 @@ set -ouex pipefail
 # Non metadata:
 
 IMAGE_INFO="/usr/share/ublue-os/image-info.json"
-OS_RELEASE_FILE= "/usr/lib/os-release"
-OS_NAME="Kyanite"
-OS_NAME_PRETTY="${OS_NAME,,}"
+OS_RELEASE_FILE="/usr/lib/os-release"
+OS_ID=kyanite
+OS_NAME="${OS_ID^}"
+OS_NAME_PRETTY="${OS_ID}"
+
 
 # Common metadata for all flavors
 
 IMAGE_VENDOR="lightprod"
-CPE_NAME="cpe:/o:lightprod:${OS_NAME_PRETTY}:${FEDORA_VERSION}"
+CPE_NAME="cpe:/o:${IMAGE_VENDOR}:${OS_NAME_PRETTY}:${FEDORA_VERSION}"
 DEFAULT_HOSTNAME="${OS_NAME_PRETTY}"
 HOME_URL="https://github.com/Lightprod/Kyanite"
 SUPPORT_URL="https://github.com/Lightprod/Kyanite/issues"
@@ -51,25 +53,25 @@ BOOTLOADER_NAME="${OS_NAME} ${FEDORA_VERSION}"
 # IMAGE_BRANCH_NORMALIZED=$IMAGE_BRANCH
 # IMAGE_TAG="${FEDORA_VERSION}"
 
-fonction define_image_metadata(){
-  # Flavor metadata
-    case "${IMAGE_FLAVOR}" in
-      "main")
-        log "Image flavor is main."
+define_image_metadata(){
+#   # Flavor metadata
+#     case "${IMAGE_FLAVOR}" in
+#       "main")
+#         log "Image flavor is main."
 
         IMAGE_NAME="${OS_NAME_PRETTY}"
         VARIANT="${OS_NAME}"
         VARIANT_ID="${OS_NAME_PRETTY}"
 
-      ;;
-      "main-bsx")
-        log "Image flavor is main-bsx."
+      # ;;
+      # "main-bsx")
+      #   log "Image flavor is main-bsx."
 
-        IMAGE_NAME="${OS_NAME_PRETTY}-bsx"
-        VARIANT="Big Screen"
-        VARIANT_ID="bsx"
+      #   IMAGE_NAME="${OS_NAME_PRETTY}-bsx"
+      #   VARIANT="Big Screen"
+      #   VARIANT_ID="bsx"
 
-      ;;
+      # ;;
       # "main-nvidia")
       #   log "Image flavor is main-nvidia."
 
@@ -85,16 +87,15 @@ fonction define_image_metadata(){
       #   VARIANT="Big Screen"
       #   VARIANT_ID="bsx-nvidia"
       # ;;
-      *)
-        log "Image flavor not found. Aborting!"
-        exit 1
-      ;;
-    esac
+    #   *)
+    #     log "Image flavor not found. Aborting!"
+    #     exit 1
+    #   ;;
+    # esac
 
 
 IMAGE_REF="ostree-image-signed:docker://ghcr.io/$IMAGE_VENDOR/$IMAGE_NAME"
-VERSION="${IMAGE_VERSION} (${VARIANT})" # <= Need to get build nb from the action
-# ID="${OS_NAME_PRETTY}"
+# VERSION="${IMAGE_VERSION} (${VARIANT})" # <= Need to get build nb from the action
 
 }
 
@@ -124,22 +125,29 @@ EOF
 
 log "Setting up os Release file"
 
-sed -i "s/^NAME=.*/NAME=\"${OS_NAME}\"/" $OS_RELEASE_FILE
-sed -i "s/^VERSION=.*/VERSION=\"${VERSION}\"" $OS_RELEASE_FILE
-sed -i "s/^VERSION_CODENAME=.*/VERSION_CODENAME=\" \"" $OS_RELEASE_FILE
+sed -i "s|^NAME=.*|NAME=\"${OS_NAME}\"|" "${OS_RELEASE_FILE}"
+# sed -i "s/^VERSION=.*/VERSION=\"${VERSION}\"" "${OS_RELEASE_FILE}"
+# sed -i "s/^VERSION_CODENAME=.*/VERSION_CODENAME=\"\"" "${OS_RELEASE_FILE}"
 # sed -i "s/^PRETTY_NAME=.*/PRETTY_NAME='"'${OS_NAME} # Might not change it due to Steam Hardware Survey
-sed -i "s/^CPE_NAME=.*/^CPE_NAME=\"${CPE_NAME}\" /" $OS_RELEASE_FILE
-sed -i "s/^DEFAULT_HOSTNAME=.*/DEFAULT_HOSTNAME=\"${DEFAULT_HOSTNAME}\"/" $OS_RELEASE_FILE
-sed -i "s|^HOME_URL=.*/HOME_URL=\"${HOME_URL}\" /" $OS_RELEASE_FILE
-sed -i "s|^SUPPORT_URL=.*/SUPPORT_URL=\"${SUPPORT_URL}\" /" $OS_RELEASE_FILE
-sed -i "s|^BUG_REPORT_URL=.*/BUG_REPORT_URL=\"${BUG_SUPPORT_URL}\" /" $OS_RELEASE_FILE
-sed -i "s|^VARIANT=.*/VARIANT=\"${VARIANT}\" /" $OS_RELEASE_FILE
-sed -i "s|^VARIANT_ID=.*/VARIANT_ID=\"${VARIANT_ID}\" /" $OS_RELEASE_FILE
-sed -i "s|^OSTREE_ID=.*/OSTREE_ID=\"${IMAGE_VERSION}\" /" $OS_RELEASE_FILE
-sed -i "s|^BUILD_ID=.*/BUILD_ID=\"${BUILD_ID}\" /" $OS_RELEASE_FILE
-sed -i "s|^IMAGE_ID=.*/IMAGE_ID=\"${IMAGE_NAME}\" /" $OS_RELEASE_FILE
-sed -i "s|^IMAGE_VERSION=.*/IMAGE_VERSION=\"${IMAGE_VERSION}\" /" $OS_RELEASE_FILE
-echo "BOOTLOADER_NAME=\"${BOOTLOADER_NAME}\"" >> $OS_RELEASE_FILE
+sed -i "/^ID=.*/d" "${OS_RELEASE_FILE}"
+sed -i "4iID=${OS_ID}" "${OS_RELEASE_FILE}"
+sed -i "5iID_LIKE=fedora" "${OS_RELEASE_FILE}"
+sed -i "s|^CPE_NAME=.*|CPE_NAME=\"${CPE_NAME}\"|" "${OS_RELEASE_FILE}"
+sed -i "s/^DEFAULT_HOSTNAME=.*/DEFAULT_HOSTNAME=\"${DEFAULT_HOSTNAME}\"/" "${OS_RELEASE_FILE}"
+sed -i "s|^HOME_URL=.*|HOME_URL=\"${HOME_URL}\"|" "${OS_RELEASE_FILE}"
+sed -i "s|^SUPPORT_URL=.*|SUPPORT_URL=\"${SUPPORT_URL}\"|" "${OS_RELEASE_FILE}"
+sed -i "s|^BUG_REPORT_URL=.*|BUG_REPORT_URL=\"${BUG_SUPPORT_URL}\"|" "${OS_RELEASE_FILE}"
+sed -i "s|^VARIANT=.*|VARIANT=\"${VARIANT}\"|" "${OS_RELEASE_FILE}"
+sed -i "s|^VARIANT_ID=.*|VARIANT_ID=\"${VARIANT_ID}\"|" "${OS_RELEASE_FILE}"
+# sed -i "s|^OSTREE_ID=.*/OSTREE_ID=\"${IMAGE_VERSION}\"/" $OS_RELEASE_FILE
+# sed -i "s|^BUILD_ID=.*/BUILD_ID=\"${BUILD_ID}\"/" $OS_RELEASE_FILE
+# sed -i "s|^IMAGE_ID=.*/IMAGE_ID=\"${IMAGE_NAME}\"/" "${OS_RELEASE_FILE}"
+# sed -i "s|^IMAGE_VERSION=.*/IMAGE_VERSION=\"${IMAGE_VERSION}\" /" $OS_RELEASE_FILE
+sed -i "/REDHAT_BUGZILLA_PRODUCT=.*/d" "${OS_RELEASE_FILE}"
+sed -i "/REDHAT_BUGZILLA_PRODUCT_VERSION=.*/d" "${OS_RELEASE_FILE}"
+sed -i "/REDHAT_SUPPORT_PRODUCT=.*/d" "${OS_RELEASE_FILE}"
+sed -i "/REDHAT_SUPPORT_PRODUCT_VERSION=.*/d" "${OS_RELEASE_FILE}"
+echo "BOOTLOADER_NAME=\"${BOOTLOADER_NAME}\"" >> "${OS_RELEASE_FILE}"
 
 log "Fix issues caused by ID no longer being fedora"
 sed -i "s/^EFIDIR=.*/EFIDIR=\"fedora\"/" /usr/sbin/grub2-switch-to-blscfg
@@ -147,7 +155,7 @@ sed -i "s/^EFIDIR=.*/EFIDIR=\"fedora\"/" /usr/sbin/grub2-switch-to-blscfg
 log "Done."
 
 display $IMAGE_INFO
-display /usr/lib/os-release
+display $OS_RELEASE_FILE
 
 # Note: Rebuild initramfs
 
