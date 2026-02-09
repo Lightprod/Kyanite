@@ -77,11 +77,11 @@ PLASMA_UNSTABLE_COPR_REPO=(
     "solopasha/kde-gear-unstable"
 )
 
-# STEAM_ONLY_RPM_FUSION=(
-#     "rpmfusion-nonfree-steam"
-#     "rpmfusion-nonfree-steam-debuginfo"
-#     "rpmfusion-nonfree-steam-source"
-# )
+STEAM_ONLY_RPM_FUSION=(
+    "rpmfusion-nonfree-steam"
+    "rpmfusion-nonfree-steam-debuginfo"
+    "rpmfusion-nonfree-steam-source"
+)
 
 
  # Upstream packages to remove
