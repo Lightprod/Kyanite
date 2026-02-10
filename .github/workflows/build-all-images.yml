@@ -1,0 +1,31 @@
+---
+name: Build all kyanite images
+on:
+  # pull_request:
+    # branches:
+      # - main
+  # schedule:
+    # - cron: '05 10 * * *'  # 10:05am UTC everyday
+  # push:
+    # branches:
+      # - main
+    # paths-ignore:
+      # - '**/README.md'
+      # - '.vscode/**'
+  workflow_dispatch:
+
+permissions:
+      contents: read
+      packages: write
+      id-token: write
+
+jobs:
+    build-kyanite-base:
+        uses: ./.github/workflows/build-base-image.yml
+         
+    # build-kyanite-htx:
+    #     uses: ./.github/workflows/build-htx-image.yml
+
+    # build-kyanite-htx-bsx:
+    #     uses: ./.github/workflows/build-htx-bsx-image.yml
+    
