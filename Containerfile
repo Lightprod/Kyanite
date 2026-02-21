@@ -3,6 +3,7 @@
 ##########################################
 
 ARG FEDORA_VERSION="43"
+ARG IMAGE_VERSION="43.20260212"
 # ARG IMAGE_FLAVOR="main"
 
 # Allow build scripts to be referenced without being copied into the final image
@@ -32,6 +33,7 @@ RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
 FROM kinoite AS kyanite_base
 
 ARG FEDORA_VERSION
+ARG IMAGE_VERSION
 ARG IMAGE_FLAVOR="base"
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
@@ -40,6 +42,21 @@ RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
     --mount=type=tmpfs,dst=/tmp \
     /ctx/bld/kyanite/base/build.sh 
 
+
+##########################################
+#           HOME THEATER IMAGE           #
+##########################################
+
+FROM kyanite_base AS kyanite_htx
+
+ARG FEDORA_VERSION
+ARG IMAGE_VERSION
+
+RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
+    --mount=type=cache,dst=/var/cache \
+    --mount=type=cache,dst=/var/log \
+    --mount=type=tmpfs,dst=/tmp \
+    /ctx/bld/kyanite/htx/build.sh 
 
 ##########################################
 #         VERIFY FILE AND COMMIT         #
