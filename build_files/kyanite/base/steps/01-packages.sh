@@ -98,11 +98,21 @@ log "Installing packages from rpm-fusion..."
 #  Enable flatpak copr from ublue to use an updated flatpak
 
 log "Enabling Ublue's flatpak repo..."
-    dnf copr enable ublue-os/flatpak-test
-    REPO_NAME="copr:copr.fedorainfracloud.org:ublue-os/flatpak-test"
+
+
+    REPO="ublue-os/flatpak-test"
+    REPO_ID="copr:copr.fedorainfracloud.org:${REPO////:}"
+
+    dnf copr enable -y "${REPO}"
+    dnf5 config-manager setopt "${REPO_ID}.priority=1"
+
 
 # ======================================================================================
 #  Update flatpak from Ublue COPR   
 
 log "Update flatpak packages"
     dnf update -y --repo="${REPO_ID}" --allowerasing
+    # dnf install --skip-broken --skip-unavailable -y flatpak
+    dnf5 config-manager setopt "${REPO_ID}.priority=99"
+
+log "Done"
