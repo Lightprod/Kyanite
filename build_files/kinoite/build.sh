@@ -7,7 +7,7 @@ log() { # from AmyOS's build files
 display() {
     echo ""
     echo "============= Content of $* ==============="
-    cat $*
+    cat "$*"
     echo "==========================================
     "
 }

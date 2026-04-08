@@ -7,7 +7,7 @@ log() { # from AmyOS's build files
 display() {
     echo ""
     echo "============= Content of $* ==============="
-    cat $*
+    cat "$*"
     echo "==========================================
     "
 }
@@ -23,7 +23,7 @@ log "Step 2 : Install CachyOS's kernel"
     /ctx/bld/kyanite/base/steps/02-kernel.sh
 
 log "Step 3 : Configuring system"
-    /ctx/bld/kyanite/base/steps/01-image-metadata.sh
+    /ctx/bld/kyanite/base/steps/03-system.sh
 
 log "Cleanup build"
     /ctx/bld/common/cleanup.sh
