@@ -3,8 +3,7 @@
 ##########################################
 
 ARG FEDORA_VERSION="43"
-ARG IMAGE_VERSION="43.20260212"
-# ARG IMAGE_FLAVOR="main"
+ARG IMAGE_VERSION="43.20260407"
 
 # Allow build scripts to be referenced without being copied into the final image
 FROM scratch AS ctx
@@ -36,6 +35,8 @@ ARG FEDORA_VERSION
 ARG IMAGE_VERSION
 ARG IMAGE_FLAVOR="base"
 
+COPY system_files/base /
+
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
     --mount=type=cache,dst=/var/cache \
     --mount=type=cache,dst=/var/log \
@@ -47,22 +48,26 @@ RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
 #           HOME THEATER IMAGE           #
 ##########################################
 
-FROM kyanite_base AS kyanite_htx
+# FROM kyanite_base AS kyanite_htx
 
-ARG FEDORA_VERSION
-ARG IMAGE_VERSION
+# ARG FEDORA_VERSION
+# ARG IMAGE_VERSION
+# ARG IMAGE_FLAVOR="htx"
 
-RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
-    --mount=type=cache,dst=/var/cache \
-    --mount=type=cache,dst=/var/log \
-    --mount=type=tmpfs,dst=/tmp \
-    /ctx/bld/kyanite/htx/build.sh 
+# COPY system_files/htx /
+
+# RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
+#     --mount=type=cache,dst=/var/cache \
+#     --mount=type=cache,dst=/var/log \
+#     --mount=type=tmpfs,dst=/tmp \
+#     /ctx/bld/kyanite/htx/build.sh 
+
 
 ##########################################
 #         VERIFY FILE AND COMMIT         #
 ##########################################
 
-RUN ostree container commit
+RUN ostree container commit 
 RUN bootc container lint
 
 
