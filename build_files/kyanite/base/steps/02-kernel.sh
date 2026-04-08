@@ -1,73 +1,61 @@
-#!/bin/bash
+#!/usr/bin/bash
+set -eoux pipefail
 
-log() { # from AmyOS's build files
-  echo "=== $* ==="
-}
+dnf5 copr enable -y bieszczaders/kernel-cachyos-addons
 
-display() {
-    echo ""
-    echo "============= Content of $* ==============="
-    cat $*
-    echo "==========================================
-    "
-}
+# Adds required package for the scheduler
+dnf5 install -y \
+    --enablerepo="copr:copr.fedorainfracloud.org:bieszczaders:kernel-cachyos-addons" \
+    --allowerasing \
+    libcap-ng libcap-ng-devel bore-sysctl cachyos-ksm-settings procps-ng procps-ng-devel uksmd libbpf scx-scheds scx-tools scx-manager cachyos-settings
 
-set -ouex pipefail
+# Adds the longterm kernel repo
+dnf5 copr enable -y bieszczaders/kernel-cachyos
 
-# ======================================================================================
-# Defining variables
+# Remove useless kernels
+readarray -t OLD_KERNELS < <(rpm -qa 'kernel-*')
+if (( ${#OLD_KERNELS[@]} )); then
+    rpm -e --justdb --nodeps "${OLD_KERNELS[@]}"
+    dnf5 versionlock delete "${OLD_KERNELS[@]}" || true
+    rm -rf /usr/lib/modules/*
+    rm -rf /lib/modules/*
+fi
 
-KERNEL_PACKAGES=(
-    "kernel" 
-    "kernel-core" 
-    "kernel-modules" 
-    "kernel-modules-core" 
-    "kernel-modules-extra"
-)
+# Install kernel packages (noscripts required for 43+)
+dnf5 install -y \
+    --enablerepo="copr:copr.fedorainfracloud.org:bieszczaders:kernel-cachyos" \
+    --allowerasing \
+    --setopt=tsflags=noscripts \
+    kernel-cachyos-lts \
+    kernel-cachyos-lts-devel-matched \
+    kernel-cachyos-lts-devel \
+    kernel-cachyos-lts-modules \
+    kernel-cachyos-lts-core
+
+KERNEL_VERSION="$(rpm -q --qf '%{VERSION}-%{RELEASE}.%{ARCH}\n' kernel-cachyos-lts)"
+
+# Depmod (required for fedora 43+)
+depmod -a "${KERNEL_VERSION}"
+
+# Copy vmlinuz
+VMLINUZ_SOURCE="/usr/lib/kernel/vmlinuz-${KERNEL_VERSION}"
+VMLINUZ_TARGET="/usr/lib/modules/${KERNEL_VERSION}/vmlinuz"
+if [[ -f "${VMLINUZ_SOURCE}" ]]; then
+    cp "${VMLINUZ_SOURCE}" "${VMLINUZ_TARGET}"
+fi
+
+# Lock kernel packages
+dnf5 versionlock add "kernel-cachyos-lts-${KERNEL_VERSION}" || true
+dnf5 versionlock add "kernel-cachyos-lts-modules-${KERNEL_VERSION}" || true
 
 
-# ======================================================================================
-#  Bypass kernel install darcut trigger
-#  based on : https://github.com/ublue-os/bazzite/blob/2f54d203f7f60a6d68fad4c7f2212fa26a5ee452/build_files/install-kernel#L8-L16
-#  and : https://github.com/ublue-os/bazzite/blob/2f54d203f7f60a6d68fad4c7f2212fa26a5ee452/build_files/install-kernel#L52-L55
+# Thank you @renner03 for this part
+export DRACUT_NO_XATTR=1
+dracut --force \
+  --no-hostonly \
+  --kver "${KERNEL_VERSION}" \
+  --add-drivers "btrfs nvme xfs ext4" \
+  --reproducible -v --add ostree \
+  -f "/usr/lib/modules/${KERNEL_VERSION}/initramfs.img"
 
-log "Bypassing darcut"
-
-pushd /usr/lib/kernel/install.d
-mv 05-rpmostree.install 05-rpmostree.install.bak
-mv 50-dracut.install 50-dracut.install.bak
-printf '%s\n' '#!/bin/sh' 'exit 0' > 05-rpmostree.install
-printf '%s\n' '#!/bin/sh' 'exit 0' > 50-dracut.install
-chmod +x  05-rpmostree.install 50-dracut.install
-popd
-
-# ======================================================================================
-#  Swap Fedora kernel for CachyOS kernel
-
-log "Activating CachyOS Kernel COPR..."
-    dnf copr enable bieszczaders/kernel-cachyos -y
-    # dnf copr enable bieszczaders/kernel-cachyos-addons
-
-log "Removing Fedora's kernel and installing CachyOS's kernel"
-    # dnf swap --skip-broken --skip-unavailable -y --repo=copr:copr.fedorainfracloud.org:bieszczaders/kernel-cachyos
-    dnf remove -y remove ${KERNEL_PACKAGES[@]}
-    dnf install --skip-broken --skip-unavailable -y kernel-cachyos-devel-matched
-
-# Setup SELinux for loading kernel modules
-    setsebool -P domain_kernel_load_modules on
-
-# ======================================================================================
-#  Reversing dracut bypass
-#  based on : https://github.com/ublue-os/bazzite/blob/2f54d203f7f60a6d68fad4c7f2212fa26a5ee452/build_files/install-kernel#L52-L55
-
-log "Reversing dracut bypass"
-
-pushd /usr/lib/kernel/install.d
-mv -f 05-rpmostree.install.bak 05-rpmostree.install
-mv -f 50-dracut.install.bak 50-dracut.install
-popd
-
-log "Rebuilding initramfs..."
-   /ctx/bld/common/initramfs.sh
-
-log "Done."
+chmod 0600 "/lib/modules/${KERNEL_VERSION}/initramfs.img"

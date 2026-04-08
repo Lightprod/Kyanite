@@ -35,7 +35,7 @@ ARG FEDORA_VERSION
 ARG IMAGE_VERSION
 ARG IMAGE_FLAVOR="base"
 
-COPY system_files/base /
+# COPY system_files/base /
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
     --mount=type=cache,dst=/var/cache \

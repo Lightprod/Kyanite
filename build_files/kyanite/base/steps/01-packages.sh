@@ -26,7 +26,6 @@ ADD_PACKAGES_FEDORA_REPO=(
     "cockpit"
     "cockpit-files"
     # "cockpit-ostree"
-    "cockpit-navigator"
     "cockpit-bridge"
 	"cockpit-networkmanager"
 	# "cockpit-podman"

@@ -22,8 +22,8 @@ log "Step 1 : Install common packages"
 log "Step 2 : Install CachyOS's kernel"
     /ctx/bld/kyanite/base/steps/02-kernel.sh
 
-log "Step 3 : Configuring system"
-    /ctx/bld/kyanite/base/steps/01-image-metadata.sh
+# log "Step 3 : Configuring system"
+#     /ctx/bld/kyanite/base/steps/01-image-metadata.sh
 
-log "Cleanup build"
-    /ctx/bld/common/cleanup.sh
+# log "Cleanup build"
+#     /ctx/bld/common/cleanup.sh
