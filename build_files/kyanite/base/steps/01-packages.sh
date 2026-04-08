@@ -41,6 +41,9 @@ ADD_PACKAGES_FEDORA_REPO=(
     "mc"
     "atuin"
     "gparted"
+    # "plasma-login-manager" # Exist in F44
+    "plasma-bigscreen"
+    # "plasma-setup" # Exist in F44
 )
 
 EXCLUDED_PACKAGE_FEDORA_REPO="cockpit-ostree,cockpit-podman,cockpit-packagekit"
@@ -60,11 +63,12 @@ ADD_PACKAGES_COPR_UBLUE=(
     "ublue-fastfetch"
 	"ublue-motd"
 )
+
 # ======================================================================================
 #  Remove uneeded packages from Kinoite
 
 log "Removing packages..."
-    dnf remove -y ${REMOVE_PACKAGES[@]}
+    dnf5 remove -y ${REMOVE_PACKAGES[@]}
 
 # ======================================================================================
 #  Enable fedora-multimedia repo
@@ -76,8 +80,9 @@ log "Enabling fedora-multimedia..."
 #  Install packages from fedora repos
 
 log "Installing packages from fedora repos..."
-    dnf install --skip-broken --skip-unavailable --exclude=${EXCLUDED_PACKAGE_FEDORA_REPO} -y ${ADD_PACKAGES_FEDORA_REPO[@]}
-
+    dnf5 --setopt=tsflags=noscripts install --exclude=${EXCLUDED_PACKAGE_FEDORA_REPO} -y ${ADD_PACKAGES_FEDORA_REPO[@]}
+    # dnf5 install --skip-broken --skip-unavailable --exclude=${EXCLUDED_PACKAGE_FEDORA_REPO} -y ${ADD_PACKAGES_FEDORA_REPO[@]}
+    # exit 1
 # ======================================================================================
 #  Install Terra repo
 
@@ -88,10 +93,10 @@ log "Installing Terra repo..."
 #  Install packages from terra repos
 
 log "Installing packages from Terra..."
-    dnf5 install -y ${ADD_PACKAGES_TERRA_REPO[@]}
+    dnf5 --setopt=tsflags=noscripts install --exclude=${EXCLUDED_PACKAGE_TERRA_REPO} -y ${ADD_PACKAGES_TERRA_REPO[@]}
 
 # ======================================================================================
-#  Enable flatpak copr from ublue to use an updated flatpak
+#  Enable flatpak copr from ublue and update flatpak
 
 log "Enabling Ublue's flatpak repo..."
 
@@ -99,16 +104,29 @@ log "Enabling Ublue's flatpak repo..."
     REPO="ublue-os/flatpak-test"
     REPO_ID="copr:copr.fedorainfracloud.org:${REPO////:}"
 
-    dnf copr enable -y "${REPO}"
+    dnf5 copr enable -y "${REPO}"
     dnf5 config-manager setopt "${REPO_ID}.priority=1"
 
-
-# ======================================================================================
-#  Update flatpak from Ublue COPR   
-
-log "Update flatpak packages"
-    dnf update -y --repo="${REPO_ID}" --allowerasing
+log "Update flatpak package"
+    dnf5 update -y --repo="${REPO_ID}" --allowerasing
     # dnf install --skip-broken --skip-unavailable -y flatpak
     dnf5 config-manager setopt "${REPO_ID}.priority=99"
+
+# ======================================================================================
+#  Enable wallpaper-engine-kde-plugin COPR Repo and install it
+
+    REPO="jackgreiner/wallpaper-engine-kde-plugin"
+    REPO_ID="copr:copr.fedorainfracloud.org:${REPO////:}"
+
+
+log "Enabling wallpaper-engine-kde-plugin repo..."
+
+    dnf5 copr enable -y "${REPO}"
+    dnf5 config-manager setopt "${REPO_ID}.priority=1"
+
+log "Installing wallpaper-engine-kde-plugin"
+    dnf5 install -y "wallpaper-engine-kde-plugin"
+    dnf5 config-manager setopt "${REPO_ID}.priority=99"
+
 
 log "Done"
