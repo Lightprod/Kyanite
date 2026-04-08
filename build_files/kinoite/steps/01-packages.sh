@@ -7,7 +7,7 @@ log() { # from AmyOS's build files
 display() {
     echo ""
     echo "============= Content of $* ==============="
-    cat $*
+    cat "$*"
     echo "==========================================
     "
 }
@@ -28,12 +28,12 @@ ADD_PACKAGES=(
 # ====================================================================
 # Remove packages
 
-dnf remove -y ${REMOVE_PACKAGES[@]}
+dnf5 remove -y "${REMOVE_PACKAGES[@]}"
 
 # ====================================================================
 # Add removed packages
 
-    dnf install --skip-broken --skip-unavailable -y ${ADD_PACKAGES[@]}
+dnf5 install -y "${ADD_PACKAGES[@]}"
 
 
 

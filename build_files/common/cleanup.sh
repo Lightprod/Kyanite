@@ -7,7 +7,7 @@ log() { # from AmyOS's build files
 display() {
     echo ""
     echo "============= Content of $* ==============="
-    cat $*
+    cat "$*"
     echo "==========================================
     "
 }
@@ -18,7 +18,7 @@ set -ouex pipefail
 
 log "Clean up dnf"
 
-dnf clean all
+dnf5 clean all
 # dnf4 clean all
 
 echo 'Clean up temporary files'
