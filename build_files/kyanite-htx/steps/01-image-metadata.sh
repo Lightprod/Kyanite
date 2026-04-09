@@ -2,37 +2,37 @@
 
 # Based on the work done in Aurora and Bazzite
 
-log() { # from AmyOS's build files
-  echo "=== $* ==="
-}
+# log() { # from AmyOS's build files
+#   echo "=== $* ==="
+# }
 
-display() {
-    echo ""
-    echo "============= Content of $* ==============="
-    cat $*
-    echo "==========================================
-    "
-}
+# display() {
+#     echo ""
+#     echo "============= Content of $* ==============="
+#     cat "$*"
+#     echo "==========================================
+#     "
+# }
 
 set -ouex pipefail
 
 
 # Defining variables
 
-# Non metadata:
+# Files:
 
 IMAGE_INFO="/usr/share/ublue-os/image-info.json"
 OS_RELEASE_FILE="/usr/lib/os-release"
 
 
 
-# Image metadata
-log "Defining image metadata"
+# Image metadata:
+# log "Defining image metadata"
 
 OS_ID="kyanite"
 OS_NAME="${OS_ID^}"
 OS_NAME_PRETTY="${OS_ID}"
-OS_FLAVOR_ID="htx"
+# OS_FLAVOR_ID="htx"
 
 IMAGE_NAME="${OS_NAME_PRETTY}"
 IMAGE_FLAVOR="htx"
@@ -71,7 +71,7 @@ BOOTLOADER_NAME="${OS_NAME}.${IMAGE_VERSION}"
 # define_image_metadata
 
 
-log "Setting up image info file"
+# log "Setting up image info file"
 
 cat > $IMAGE_INFO <<EOF
 {
@@ -91,7 +91,7 @@ EOF
   # "version": "$VERSION_TAG",
   # "version-pretty": "$VERSION_PRETTY"
 
-log "Setting up os Release file"
+# log "Setting up os Release file"
 
 sed -i "s|^NAME=.*|NAME=\"${OS_NAME}\"|" "${OS_RELEASE_FILE}"
 sed -i "s|^VERSION=.*|VERSION=\"${IMAGE_VERSION}\"|" "${OS_RELEASE_FILE}"
@@ -121,10 +121,10 @@ echo "BOOTLOADER_NAME=\"${BOOTLOADER_NAME}\"" >> "${OS_RELEASE_FILE}"
 # log "Fix issues caused by ID no longer being fedora"
 # sed -i "s/^EFIDIR=.*/EFIDIR=\"fedora\"/" /usr/sbin/grub2-switch-to-blscfg
 
-log "Done."
+# log "Done."
 
-display $IMAGE_INFO
-display $OS_RELEASE_FILE
+# display $IMAGE_INFO
+# display $OS_RELEASE_FILE
 
 # Note: Rebuild initramfs
 
