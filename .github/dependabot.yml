@@ -9,3 +9,8 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    pull-request-branch-name:
+      separator: "-"
+    target-branch: "unstable"
+    commit-message:
+      prefix: "chore(deps)-unstable: "
