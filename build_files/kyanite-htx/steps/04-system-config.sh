@@ -21,6 +21,9 @@ display() {
 # Variables:
 
 KYANITE_JUST_CONFIG=$(< /usr/share/kyanite/just/justfile)
+FLATPAK_PREINSTALL_FOLDER="/usr/share/flatpak/preinstall.d"
+FLATPAK_PREINSTALL_FILES_LIST=($(ls "${FLATPAK_PREINSTALL_FOLDER}"))
+PREINSTALL_LIST_FILE="/usr/share/kyanite/flatpak/preinstall"
 
 # ======================================================================================
 # Enable systemd services
@@ -65,6 +68,21 @@ chmod +x flatpak-manager
 cd /usr/share/ublue-os
 
 sed -i "11i${KYANITE_JUST_CONFIG}" justfile
+
+# ======================================================================================
+# Generate readable flatpak preinstall list
+
+{ log "Generate a readable list of preinstalled flatpaks..."; } 2> /dev/null
+
+touch "${PREINSTALL_LIST_FILE}"
+
+for flatpak in "${FLATPAK_PREINSTALL_FILES_LIST[@]}"; do
+    FLATPAK_NAME=$(echo "${flatpak}" | cut -d. -f 1)
+    FLATPAK_ID=$(cat "${flatpak}" | grep -P "Flatpak Preinstall *" )
+    FLATPAK_ID=$(echo "${FLATPAK_ID}" | cut -d ' ' -f 3 | cut -d] -f -1 )
+    echo "${FLATPAK_NAME^} (${FLATPAK_ID})" >> "${PREINSTALL_LIST_FILE}"
+done
+
 
 # ======================================================================================
 # Amending default bashrc config
