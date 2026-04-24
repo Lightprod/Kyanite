@@ -70,7 +70,7 @@ SYSTEM_PACKAGES_FEDORA_REPO=(
 KDE_PACKAGES_FEDORA_REPO=(
     "plasma-login-manager" # Exist in F44
     "plasma-bigscreen"
-    # "plasma-setup" # Exist in F44
+    "plasma-setup" # Exist in F44
 )
 
 SYSTEM_PACKAGES_TERRA_REPO=(
@@ -91,24 +91,28 @@ UBLUE_COPR_PACKAGES=(
     "ublue-os-just"
 )
 
+EXTERNAL_PACKAGES=(
+    "firefoxpwa"
+)
+
 # ======================================================================================
 #  Enable fedora-multimedia repo
 
-log "Enabling fedora-multimedia..."
+{ log "Enabling fedora-multimedia..."; } 2> /dev/null
 
 dnf5 -y config-manager setopt fedora-multimedia.enabled=1
 
 # ======================================================================================
 #  Remove uneeded packages from upstream
 
-log "Removing packages..."
+{ log "Removing packages..."; } 2> /dev/null
 
 dnf5 remove -y "${REMOVE_UPSTREAM_PACKAGES[@]}"
 
 # ======================================================================================
 #  Install cockpit from Fedora repos
 
-log "Installing Cockpit..."
+{ log "Installing Cockpit..."; } 2> /dev/null
 
 # dnf5 --setopt=tsflags=noscripts install --exclude=${EXCLUDED_COCKPIT_PACKAGES} -y "${COCKPIT_PACKAGES_FEDORA_REPO[@]}"
 dnf5 install --exclude=${EXCLUDED_COCKPIT_PACKAGES} -y "${COCKPIT_PACKAGES_FEDORA_REPO[@]}"
@@ -116,35 +120,35 @@ dnf5 install --exclude=${EXCLUDED_COCKPIT_PACKAGES} -y "${COCKPIT_PACKAGES_FEDOR
 # ======================================================================================
 #  Install packages from Fedora repos
 
-log "Installing system packages..."
+{ log "Installing system packages..."; } 2> /dev/null
 
 dnf5 install -y "${SYSTEM_PACKAGES_FEDORA_REPO[@]}"
 
 # ======================================================================================
 #  Install KDE packages from Fedora repos
 
-log "Installing KDE packages..."
+{ log "Installing KDE packages..."; } 2> /dev/null
 
 dnf5 install -y "${KDE_PACKAGES_FEDORA_REPO[@]}"
 
 # ======================================================================================
 #  Install Terra repo
 
-log "Installing Terra repo..."
+{ log "Installing Terra repo..."; } 2> /dev/null
 
 dnf5 install -y --nogpgcheck --repofrompath 'terra,https://repos.fyralabs.com/terra$releasever' terra-release
 
 # ======================================================================================
 #  Install packages from Fedora repos
 
-log "Installing system packages from Terra..."
+{ log "Installing system packages from Terra..."; } 2> /dev/null
 
 dnf5 install -y "${SYSTEM_PACKAGES_TERRA_REPO[@]}"
 
 # ======================================================================================
 #  Install Steam from Terra repos
 
-log "Installing Steam..."
+{ log "Installing Steam..."; } 2> /dev/null
 
 dnf5 install --exclude=${EXCLUDED_STEAM_PACKAGES} -y "${STEAM_PACKAGES_TERRA_REPO[@]}"
 
@@ -153,7 +157,7 @@ dnf5 install --exclude=${EXCLUDED_STEAM_PACKAGES} -y "${STEAM_PACKAGES_TERRA_REP
 
 COPR_REPO="ublue-os/flatpak-test"
 
-log "Enabling Ublue's flatpak COPR and updating flatpak..."
+{ log "Enabling Ublue's flatpak COPR and updating flatpak..."; } 2> /dev/null
 
 copr_update
 
@@ -163,7 +167,7 @@ copr_update
 COPR_REPO="ublue-os/packages"
 COPR_PACKAGES=("${UBLUE_COPR_PACKAGES[@]}")
 
-log "Enabling Ublue's package COPR and installing packages..."
+{ log "Enabling Ublue's package COPR and installing packages..."; } 2> /dev/null
 
 copr_install
 
@@ -173,8 +177,26 @@ copr_install
 COPR_REPO="jackgreiner/wallpaper-engine-kde-plugin"
 COPR_PACKAGES=("wallpaper-engine-kde-plugin")
 
-log "Enabling jackgreiner's COPR and installing wallpaper-engine-kde-plugin..."
+{ log "Enabling jackgreiner's COPR and installing wallpaper-engine-kde-plugin..."; } 2> /dev/null
 
 copr_install
 
-log "Done"
+# ======================================================================================
+#  Install packages from external repos
+
+{ log "Installing external packages..."; } 2> /dev/null
+
+dnf5 install -y "${EXTERNAL_PACKAGES[@]}"
+
+# ======================================================================================
+#  Disable Terra repo due to build errors
+
+{ log "Disabling Terra repo..."; } 2> /dev/null
+
+# dnf5 -y config-manager setopt terra.repo_gpgcheck=0
+
+rm /etc/yum.repos.d/terra.repo
+
+{ log "Done"; } 2> /dev/null
+
+
