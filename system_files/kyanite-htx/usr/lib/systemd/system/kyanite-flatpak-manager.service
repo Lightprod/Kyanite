@@ -1,0 +1,17 @@
+[Unit]
+Description="Manage flatpak configuration"
+# Before=graphical.target display-manager.service plymouth-quit-wait.service
+Before=plymouth-quit.service
+Requires=network-online.target
+After=network-online.target plymouth-start.service
+# Wants=
+
+[Service]
+Type=oneshot
+ExecStart=/usr/libexec/kyanite/flatpak-manager
+Restart=on-failure
+RestartSec=5
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

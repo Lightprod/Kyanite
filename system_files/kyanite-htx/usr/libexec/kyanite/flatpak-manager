@@ -1,0 +1,106 @@
+#!/usr/bin/bash
+
+# Script info
+SCRIPT_VER=0.2 # Not used, just for info
+# BLOCKLIST_VER=0.1
+
+CONFIG_FOLDER=$"/etc/kyanite/config"
+CONFIG_FILE=$"${CONFIG_FOLDER}/flatpak_manager"
+
+FLATPAK_BLOCKLIST="/usr/share/kyanite/flatpak/blocklist"
+
+# ============================================================================================================================================
+# functions:
+
+log() { # from AmyOS's build files
+  { echo "=== $* ==="; } 2> /dev/null
+}
+
+# ============================================================================================================================================
+
+# Exit if config file is missing
+if ! [ -f "${CONFIG_FILE}" ]; then
+    echo -e "\033[31m'Config file missing..." 
+    exit 0
+fi
+
+# Exit if script ver is the same
+
+if grep -q "SCRIPT_VER=${SCRIPT_VER}" "${CONFIG_FILE}"; then
+    echo -e "\033[33m'Script version has not changed. Skipping..."
+    exit 0
+fi
+
+# ============================================================================================================================================
+# Annonce script is running
+plymouth display-message --text="Please wait while Kyanite is finishing configurating flatpak..."
+
+# ============================================================================================================================================
+
+
+# Cleanup flatpak packages one
+
+if grep -q "DELETE_ALL_FLATPAKS=true" "${CONFIG_FILE}"; then # If set to false, skip.
+
+    if grep -q "DELETE_FLATPAK_DATA=true" "${CONFIG_FILE}"; then # If set to true, delete flatpak data
+
+        log "Removing all flatpaks and their data..."
+        flatpak remove --all --delete-data --assumeyes --noninteractive
+    else
+        log "Removing all flatpaks..."
+        flatpak remove --all --assumeyes --noninteractive
+    fi
+
+    # Disable removal for later scripts runs
+
+    sed -i "s|^SDELETE_ALL_FLATPAKS=.*|DELETE_ALL_FLATPAKS=false|" "${CONFIG_FILE}"
+    sed -i "s|^SDELETE_FLATPAK_DATA=.*|DELETE_FLATPAK_DATA=false|" "${CONFIG_FILE}"
+
+fi
+
+
+# Reset flatpaks repo once.
+if grep -q "RESET_FLATPAK_REPOS=true" "${CONFIG_FILE}"; then # If set to false, skip.
+
+    log "Removing all installed flatpaks repos..."
+
+    # Get flatpak repos and delete them
+    FLATPAK_REPO=$(flatpak remotes --show-disabled --columns=name)
+    for repo in ${FLATPAK_REPO}; do
+        flatpak remote-delete --system --force "$repo"
+    done
+
+    # Install flathub and configure it
+
+    log "Installing flathub..."
+    flatpak remote-add --system flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+    flatpak remote-modify --system --enable flathub
+
+    # Disable reseting repos for later scripts runs
+
+    sed -i "s|^SRESET_FLATPAK_REPOS=.*|RESET_FLATPAK_REPOS=false|" "${CONFIG_FILE}"
+fi
+
+
+# Filter unwanted flatpak
+if grep -q "FILTER_FLATHUB=true" "${CONFIG_FILE}"; then # If set to false, skip.
+
+    if [[ -f ${FLATPAK_BLOCKLIST} ]]; then
+        log "Filtering Flathub..."
+        flatpak remote-modify --system --filter=${FLATPAK_BLOCKLIST} flathub
+    fi
+fi
+
+# Install pre-configured flatpak 
+
+if grep -q  "INSTALL_DEFAULTS=true" "${CONFIG_FILE}"; then # If set to false, skip.
+    log "Installing preconfigured flatpaks..."
+    flatpak preinstall --system --assumeyes --noninteractive
+
+fi
+
+
+# Write versionning into config file
+
+sed -i "s|^SSCRIPT_VER=.*|SCRIPT_VER=${SCRIPT_VER}|" "${CONFIG_FILE}"
+sed -i "s|^SBLOCKLIST_VER=.*|BLOCKLIST_VER=${BLOCKLIST_VER}|" "${CONFIG_FILE}"

@@ -1,0 +1,18 @@
+##########################################
+#     KYANITE FLATPAK MANAGER CONFIG     #
+##########################################
+
+########### Script versionning ###########
+
+SCRIPT_VER=0
+
+############# Flatpak removal #############
+
+DELETE_ALL_FLATPAKS=false
+DELETE_FLATPAK_DATA=false
+
+############## Flatpak repos ##############
+
+RESET_FLATPAK_REPOS=true
+FILTER_FLATHUB=true
+
