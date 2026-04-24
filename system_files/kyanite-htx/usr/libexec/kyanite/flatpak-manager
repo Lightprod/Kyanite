@@ -1,10 +1,12 @@
 #!/usr/bin/bash
 
 # Script info
-SCRIPT_VER=0.2 # Not used, just for info
-# BLOCKLIST_VER=0.1
+SCRIPT_VER=0.3 # Not used, just for info
+BLOCKLIST_VER=0.1
+PREINSTALL_VER=0.1
 
-CONFIG_FOLDER=$"/etc/kyanite/config"
+
+CONFIG_FOLDER="/etc/kyanite/config"
 CONFIG_FILE=$"${CONFIG_FOLDER}/flatpak_manager"
 
 FLATPAK_BLOCKLIST="/usr/share/kyanite/flatpak/blocklist"
@@ -53,8 +55,8 @@ if grep -q "DELETE_ALL_FLATPAKS=true" "${CONFIG_FILE}"; then # If set to false, 
 
     # Disable removal for later scripts runs
 
-    sed -i "s|^SDELETE_ALL_FLATPAKS=.*|DELETE_ALL_FLATPAKS=false|" "${CONFIG_FILE}"
-    sed -i "s|^SDELETE_FLATPAK_DATA=.*|DELETE_FLATPAK_DATA=false|" "${CONFIG_FILE}"
+    sed -i "s|^DELETE_ALL_FLATPAKS=.*|DELETE_ALL_FLATPAKS=false|" "${CONFIG_FILE}"
+    sed -i "s|^DELETE_FLATPAK_DATA=.*|DELETE_FLATPAK_DATA=false|" "${CONFIG_FILE}"
 
 fi
 
@@ -78,7 +80,7 @@ if grep -q "RESET_FLATPAK_REPOS=true" "${CONFIG_FILE}"; then # If set to false, 
 
     # Disable reseting repos for later scripts runs
 
-    sed -i "s|^SRESET_FLATPAK_REPOS=.*|RESET_FLATPAK_REPOS=false|" "${CONFIG_FILE}"
+    sed -i "s|^RESET_FLATPAK_REPOS=.*|RESET_FLATPAK_REPOS=false|" "${CONFIG_FILE}"
 fi
 
 
@@ -88,6 +90,9 @@ if grep -q "FILTER_FLATHUB=true" "${CONFIG_FILE}"; then # If set to false, skip.
     if [[ -f ${FLATPAK_BLOCKLIST} ]]; then
         log "Filtering Flathub..."
         flatpak remote-modify --system --filter=${FLATPAK_BLOCKLIST} flathub
+        sed -i "s|^FILTER_FLATHUB=.*|FILTER_FLATHUB=false|" "${CONFIG_FILE}"
+    else
+        echo -e "\033[33m'Blocklist not found. Skipping..."
     fi
 fi
 
@@ -102,5 +107,7 @@ fi
 
 # Write versionning into config file
 
-sed -i "s|^SSCRIPT_VER=.*|SCRIPT_VER=${SCRIPT_VER}|" "${CONFIG_FILE}"
-sed -i "s|^SBLOCKLIST_VER=.*|BLOCKLIST_VER=${BLOCKLIST_VER}|" "${CONFIG_FILE}"
+sed -i "s|^SCRIPT_VER=.*|SCRIPT_VER=${SCRIPT_VER}|" "${CONFIG_FILE}"
+sed -i "s|^BLOCKLIST_VER=.*|BLOCKLIST_VER=${BLOCKLIST_VER}|" "${CONFIG_FILE}"
+sed -i "s|^PREINSTALL_VER=.*|PREINSTALL_VER=${PREINSTALL_VER}|" "${CONFIG_FILE}"
+
