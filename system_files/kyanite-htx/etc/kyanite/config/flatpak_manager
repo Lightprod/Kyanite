@@ -5,6 +5,8 @@
 ########### Script versionning ###########
 
 SCRIPT_VER=0
+BLOCKLIST_VER=0
+PREINSTALL_VER=0
 
 ############# Flatpak removal #############
 
@@ -16,3 +18,6 @@ DELETE_FLATPAK_DATA=false
 RESET_FLATPAK_REPOS=true
 FILTER_FLATHUB=true
 
+########### Flatpak preinstall ############
+
+INSTALL_DEFAULTS=true
