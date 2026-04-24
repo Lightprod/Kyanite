@@ -19,7 +19,7 @@ ARG FEDORA_VERSION
 ARG IMAGE_VERSION
 ARG IMAGE_FLAVOR="htx"
 
-# COPY system_files/htx /
+COPY system_files/kyanite-htx /
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
     --mount=type=cache,dst=/var/cache \
