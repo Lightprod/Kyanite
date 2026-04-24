@@ -160,4 +160,4 @@ export DRACUT_NO_XATTR=1
 
 chmod 0600 "/lib/modules/${KERNEL_VERSION}/initramfs.img"
 
-log "Done"
+{ log "Done"; } 2> /dev/null
