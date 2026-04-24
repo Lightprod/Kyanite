@@ -22,11 +22,14 @@ log() { # Modified from AmyOS's build files
 # { log "Step 1 : Setting up image metadata"; } 2> /dev/null
     # /ctx/bld/kyanite/htx/steps/01-image-metadata.sh
 
-# { log "Step 2 : Managing packages"; } 2> /dev/null
-    # /ctx/bld/kyanite-htx/steps/02-packages.sh
+{ log "Step 2 : Managing packages"; } 2> /dev/null
+    /ctx/bld/kyanite-htx/steps/02-packages.sh
 
 { log "Step 3 : Swapping Kernel"; } 2> /dev/null
     /ctx/bld/kyanite-htx/steps/03-kernel.sh
+
+{ log "Step 4 : Configuring the system"; } 2> /dev/null
+    /ctx/bld/kyanite-htx/steps/04-system-config.sh
 
 { log "Final step: Cleanup build"; } 2> /dev/null
     /ctx/bld/utilities/cleanup.sh
