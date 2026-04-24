@@ -1,0 +1,3 @@
+[Flatpak Preinstall com.github.zocker_160.SyncThingy]
+Branch=stable
+IsRuntime=false

@@ -1,0 +1,3 @@
+[Flatpak Preinstall io.mpv.Mpv]
+Branch=stable
+IsRuntime=false

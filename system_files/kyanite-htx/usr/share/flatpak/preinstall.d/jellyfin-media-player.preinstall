@@ -1,0 +1,3 @@
+[Flatpak Preinstall com.github.iwalton3.jellyfin-media-player]
+Branch=stable
+IsRuntime=false

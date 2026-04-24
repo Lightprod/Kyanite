@@ -1,0 +1,3 @@
+[Flatpak Preinstall tv.plex.PlexHTPC]
+Branch=stable
+IsRuntime=false

@@ -1,0 +1,3 @@
+[Flatpak Preinstall com.moonlight_stream.Moonlight]
+Branch=stable
+IsRuntime=false

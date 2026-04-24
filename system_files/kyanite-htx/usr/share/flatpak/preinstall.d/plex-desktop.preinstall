@@ -1,0 +1,3 @@
+[Flatpak Preinstall tv.plex.PlexDesktop]
+Branch=stable
+IsRuntime=false
