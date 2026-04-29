@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 
 # Script info
-SCRIPT_VER=0.3 # Not used, just for info
+SCRIPT_VER=0.3
 BLOCKLIST_VER=0.1
 PREINSTALL_VER=0.1
 
@@ -35,7 +35,7 @@ fi
 
 # ============================================================================================================================================
 # Annonce script is running
-plymouth display-message --text="Please wait while Kyanite is finishing configurating flatpak..."
+plymouth display-message --text="Please wait while Kyanite is configuring flatpak..."
 
 # ============================================================================================================================================
 
@@ -99,9 +99,9 @@ fi
 # Install pre-configured flatpak 
 
 if grep -q  "INSTALL_DEFAULTS=true" "${CONFIG_FILE}"; then # If set to false, skip.
+    plymouth display-message --text="Please wait while Kyanite is installing preconfigured flatpaks..."
     log "Installing preconfigured flatpaks..."
     flatpak preinstall --system --assumeyes --noninteractive
-
 fi
 
 
