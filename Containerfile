@@ -2,8 +2,8 @@
 #   ARGUMENTS AND PREBUILDS OPERATIONS   #
 ##########################################
 
-# ARG FEDORA_VERSION="44"
-# ARG IMAGE_VERSION="44.20260408"
+ARG FEDORA_VERSION
+ARG IMAGE_VERSION
 
 # Allow build scripts to be referenced without being copied into the final image
 FROM scratch AS ctx
