@@ -3,7 +3,7 @@
 ##########################################
 
 ARG FEDORA_VERSION
-ARG IMAGE_VERSION
+# ARG IMAGE_VERSION
 
 # Allow build scripts to be referenced without being copied into the final image
 FROM scratch AS ctx
@@ -16,7 +16,7 @@ COPY build_files /bld
 FROM ghcr.io/ublue-os/kinoite-main:${FEDORA_VERSION} AS kyanite_htx
 
 ARG FEDORA_VERSION
-ARG IMAGE_VERSION
+# ARG IMAGE_VERSION
 # ARG IMAGE_FLAVOR="htx"
 
 COPY system_files/kyanite-htx /
