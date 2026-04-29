@@ -126,7 +126,7 @@ jobs:
             --format=docker \
             --file ./Containerfile \
             --tag ${IMAGE_NAME}:${DEFAULT_TAG} \
-            --build-arg=FEDORA_VERSION=${{ env.FEDORA_VERSION }}
+            --build-arg=FEDORA_VERSION=${{ env.FEDORA_VERSION }} \
             --build-arg=IMAGE_VERSION=${{ env.FEDORA_VERSION }}.{{date 'YYYYMMDD'}}\
             .
 
