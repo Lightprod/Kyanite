@@ -30,7 +30,7 @@ env:
   IMAGE_NAME: "${{ github.event.repository.name }}-htx"  # output image name, usually same as repo name
   IMAGE_REGISTRY: "ghcr.io/${{ github.repository_owner }}"  # do not edit
   DEFAULT_TAG: "unstable"
-  FEDORA_VERSION: 43
+  FEDORA_VERSION: 44
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref || github.run_id }}-${{ inputs.brand_name}}-${{ inputs.stream_name }}
@@ -188,11 +188,7 @@ jobs:
           COSIGN_REGISTRY_USERNAME: ${{ github.actor }}
           COSIGN_REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
 
-
-
-
-
-
+# Old runner:
 
       # # These stage versions are pinned by https://github.com/renovatebot/renovate
       # - name: Checkout

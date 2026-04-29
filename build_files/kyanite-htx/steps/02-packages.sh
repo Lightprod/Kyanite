@@ -40,7 +40,7 @@ log() { # from AmyOS's build files
 REMOVE_UPSTREAM_PACKAGES=(
     "ublue-os-update-services"
     "krfb"
-    "sddm"
+    # "sddm"
 )
 
 COCKPIT_PACKAGES_FEDORA_REPO=(
@@ -68,9 +68,9 @@ SYSTEM_PACKAGES_FEDORA_REPO=(
 )
 
 KDE_PACKAGES_FEDORA_REPO=(
-    "plasma-login-manager" # Exist in F44
+    # "plasma-login-manager" # Exist in F44
     "plasma-bigscreen"
-    "plasma-setup" # Exist in F44
+    # "plasma-setup" # Exist in F44
 )
 
 SYSTEM_PACKAGES_TERRA_REPO=(
@@ -155,11 +155,11 @@ dnf5 install --exclude=${EXCLUDED_STEAM_PACKAGES} -y "${STEAM_PACKAGES_TERRA_REP
 # ======================================================================================
 #  Enable ublue's flatpak-test COPR and update flatpak package
 
-COPR_REPO="ublue-os/flatpak-test"
+# COPR_REPO="ublue-os/flatpak-test"
 
-{ log "Enabling Ublue's flatpak COPR and updating flatpak..."; } 2> /dev/null
+# { log "Enabling Ublue's flatpak COPR and updating flatpak..."; } 2> /dev/null
 
-copr_update
+# copr_update
 
 # ======================================================================================
 #  Enable ublue's packages COPR and install packages

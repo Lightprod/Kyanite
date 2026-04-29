@@ -28,13 +28,13 @@ PREINSTALL_LIST_FILE="/usr/share/kyanite/flatpak/preinstall"
 # ======================================================================================
 # Enable systemd services
 
-{ log "Enabling plasmalogin service..."; } 2> /dev/null
+# { log "Enabling plasmalogin service..."; } 2> /dev/null
 
-systemctl enable plasmalogin.service
+# systemctl enable plasmalogin.service
 
-{ log "Enabling plasmasetup service..."; } 2> /dev/null
+# { log "Enabling plasmasetup service..."; } 2> /dev/null
 
-systemctl enable plasma-setup.service
+# systemctl enable plasma-setup.service
 
 { log "Enabling cockpit service..."; } 2> /dev/null
 
@@ -74,6 +74,7 @@ sed -i "11i${KYANITE_JUST_CONFIG}" justfile
 
 { log "Generate a readable list of preinstalled flatpaks..."; } 2> /dev/null
 
+cd "${FLATPAK_PREINSTALL_FOLDER}"
 touch "${PREINSTALL_LIST_FILE}"
 
 for flatpak in "${FLATPAK_PREINSTALL_FILES_LIST[@]}"; do
@@ -90,7 +91,6 @@ done
 { log "Amending default bashrc..."; } 2> /dev/null
 
 cd /etc/skel
-
 
 echo 'eval "$(atuin init bash)"' >> ./bashrc
 echo 'eval "$(starship init bash)"' >> ./bashrc
