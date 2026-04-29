@@ -195,7 +195,8 @@ dnf5 install -y "${EXTERNAL_PACKAGES[@]}"
 
 # dnf5 -y config-manager setopt terra.repo_gpgcheck=0
 
-rm /etc/yum.repos.d/terra.repo
+sed -i "s|^enabled=1|enabled=0|" /etc/yum.repos.d/terra.repo
+# rm /etc/yum.repos.d/terra.repo
 
 { log "Done"; } 2> /dev/null
 
