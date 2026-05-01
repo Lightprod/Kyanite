@@ -24,6 +24,10 @@ KYANITE_JUST_CONFIG=$(< /usr/share/kyanite/just/justfile)
 FLATPAK_PREINSTALL_FOLDER="/usr/share/flatpak/preinstall.d"
 FLATPAK_PREINSTALL_FILES_LIST=($(ls "${FLATPAK_PREINSTALL_FOLDER}"))
 PREINSTALL_LIST_FILE="/usr/share/kyanite/flatpak/preinstall"
+INCOMPATBLE_RECIPES_FILES_NAMES=(
+    "40-nvidia"
+    "50-akmods"
+)
 
 # ======================================================================================
 # Enable systemd services
@@ -63,11 +67,22 @@ chmod +x flatpak-manager
 # ======================================================================================
 # Amending existing just config
 
+{ log "Removing uncompatible recipes from upstream..."; } 2> /dev/null
+
+for files in "${INCOMPATBLE_RECIPES_FILES_NAMES[@]}"; do
+    rm /usr/share/ublue-os/just/"${files}".just
+    sed -i "/${files}/d" /usr/share/ublue-os/justfile
+done
+
+sed -i "s|toggle-updates|_toggle-updates|" /usr/share/ublue-os/just/10-update.just
+sed -i "/alias install-resolve-studio := install-resolve/d" /usr/share/ublue-os/just/30-distrobox.just
+sed -i "s|install-resolve|_install-resolve|" /usr/share/ublue-os/just/30-distrobox.just
+
+
 { log "Adding Kyanite's justfile to existing config..."; } 2> /dev/null
 
-cd /usr/share/ublue-os
-
-sed -i "11i${KYANITE_JUST_CONFIG}" justfile
+sed -i "11i${KYANITE_JUST_CONFIG}" /usr/share/ublue-os/justfile
+sed -i "/alias install-resolve-studio := install-resolve/d" /usr/share/ublue-os/just/30-distrobox.just
 
 # ======================================================================================
 # Generate readable flatpak preinstall list

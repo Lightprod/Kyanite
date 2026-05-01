@@ -1,1 +1,2 @@
+import "/usr/share/kyanite/just/100-kyanite-overwrites.just"
 import "/usr/share/kyanite/just/101-kyanite-flatpak.just"
