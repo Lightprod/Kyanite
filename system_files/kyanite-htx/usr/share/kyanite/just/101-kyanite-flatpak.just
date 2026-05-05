@@ -25,7 +25,8 @@ show-flatpak-defaults-app:
     set -ouex pipefail
 
     echo -e "\033[32m'Preinstalled flatpaks:"
-    cat /usr/share/kyanite/flatpak/preinstall
+    {cat /usr/share/kyanite/flatpak/preinstall} 2> /dev/null
+    echo -e "\033[0m'Done."
 
 # Show flatpak blocklist
 [group('Flatpak configuration')]
