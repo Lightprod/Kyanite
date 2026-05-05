@@ -9,25 +9,30 @@ log() { # from AmyOS's build files
   { echo "=== $* ==="; } 2> /dev/null
 }
 
-display() {
-    echo ""
-    echo "============= Content of $* ==============="
-    cat "$*"
-    echo "==========================================
-    "
-}
+# display() {
+#     echo ""
+#     echo "============= Content of $* ==============="
+#     cat "$*"
+#     echo "==========================================
+#     "
+#     sleep 20s
+# }
 
 # ======================================================================================
 # Variables:
 
-KYANITE_JUST_CONFIG=$(< /usr/share/kyanite/just/justfile)
-FLATPAK_PREINSTALL_FOLDER="/usr/share/flatpak/preinstall.d"
-FLATPAK_PREINSTALL_FILES_LIST=($(ls "${FLATPAK_PREINSTALL_FOLDER}"))
-PREINSTALL_LIST_FILE="/usr/share/kyanite/flatpak/preinstall"
+KYANITE_JUST_CONFIG_FILE=/usr/share/kyanite/just/justfile
+KYANITE_JUST_OVERWRITE=$(cat "${KYANITE_JUST_CONFIG_FILE}" | grep "100-kyanite-overwrites")
+KYANITE_JUST_CONFIG=$(cat "${KYANITE_JUST_CONFIG_FILE}" | grep -v "100-kyanite-overwrites")
 INCOMPATBLE_RECIPES_FILES_NAMES=(
     "40-nvidia"
     "50-akmods"
 )
+
+
+FLATPAK_PREINSTALL_FOLDER="/usr/share/flatpak/preinstall.d"
+FLATPAK_PREINSTALL_FILES_LIST=($(ls "${FLATPAK_PREINSTALL_FOLDER}"))
+PREINSTALL_LIST_FILE="/usr/share/kyanite/flatpak/preinstall"
 
 # ======================================================================================
 # Enable systemd services
@@ -78,11 +83,10 @@ sed -i "s|toggle-updates|_toggle-updates|" /usr/share/ublue-os/just/10-update.ju
 sed -i "/alias install-resolve-studio := install-resolve/d" /usr/share/ublue-os/just/30-distrobox.just
 sed -i "s|install-resolve|_install-resolve|" /usr/share/ublue-os/just/30-distrobox.just
 
-
 { log "Adding Kyanite's justfile to existing config..."; } 2> /dev/null
 
-sed -i "11i${KYANITE_JUST_CONFIG}" /usr/share/ublue-os/justfile
-sed -i "/alias install-resolve-studio := install-resolve/d" /usr/share/ublue-os/just/30-distrobox.just
+sed -i "11i${KYANITE_JUST_OVERWRITE}" /usr/share/ublue-os/justfile
+echo "${KYANITE_JUST_CONFIG}" >> /usr/share/ublue-os/justfile
 
 # ======================================================================================
 # Generate readable flatpak preinstall list
